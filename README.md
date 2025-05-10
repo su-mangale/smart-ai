@@ -19,8 +19,8 @@ A simple, rule-based chatbot for answering college-related questions. This proje
 
 ## Project Structure
 
-\`\`\`
-SmartCollegeBot/
+```plaintext
+ai-bot/
 ├── app/                         # Main application package
 │   ├── __init__.py              # Initializes Flask app
 │   ├── routes.py                # Flask routes (API endpoints)
@@ -40,7 +40,7 @@ SmartCollegeBot/
 ├── run.py                       # Main Flask runner script
 ├── requirements.txt             # Python dependencies
 └── README.md                    # Project overview and setup guide
-\`\`\`
+```
 
 ## Setup Instructions
 
