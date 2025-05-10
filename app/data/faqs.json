@@ -1,0 +1,134 @@
+{
+    "faqs": [
+        {
+            "question": "What are the admission requirements?",
+            "answer": "Our college requires a high school diploma or GED, a minimum GPA of 2.5, and SAT/ACT scores. Some programs may have additional requirements. Visit our admissions page for more details.",
+            "keywords": [
+                "admission",
+                "requirements",
+                "apply",
+                "application",
+                "enroll",
+                "enrollment"
+            ]
+        },
+        {
+            "question": "When is the application deadline?",
+            "answer": "For fall semester, the application deadline is May 1st. For spring semester, it's November 1st. Early decision applications are due by December 15th.",
+            "keywords": [
+                "deadline",
+                "application",
+                "due date",
+                "apply by",
+                "when to apply"
+            ]
+        },
+        {
+            "question": "How much is the tuition?",
+            "answer": "Undergraduate tuition is $10,000 per semester for in-state students and $15,000 for out-of-state students. Graduate programs vary by department. Financial aid and scholarships are available.",
+            "keywords": [
+                "tuition",
+                "cost",
+                "fee",
+                "price",
+                "expensive",
+                "afford",
+                "financial"
+            ]
+        },
+        {
+            "question": "What majors do you offer?",
+            "answer": "We offer over 100 majors across 8 colleges, including Business, Engineering, Arts & Sciences, Education, and more. Popular majors include Computer Science, Business Administration, Psychology, and Nursing.",
+            "keywords": [
+                "major",
+                "program",
+                "degree",
+                "study",
+                "subject",
+                "field"
+            ]
+        },
+        {
+            "question": "Where is the campus located?",
+            "answer": "Our main campus is located in the heart of downtown, with easy access to public transportation. We also have satellite campuses in the northern and eastern parts of the city.",
+            "keywords": [
+                "location",
+                "campus",
+                "where",
+                "address",
+                "directions",
+                "map"
+            ]
+        },
+        {
+            "question": "Do you offer scholarships?",
+            "answer": "Yes, we offer merit-based and need-based scholarships. Merit scholarships range from $2,000 to full tuition. The scholarship application deadline is March 1st for the following academic year.",
+            "keywords": [
+                "scholarship",
+                "financial aid",
+                "grant",
+                "money",
+                "fund",
+                "pay"
+            ]
+        },
+        {
+            "question": "What is the student-to-faculty ratio?",
+            "answer": "Our student-to-faculty ratio is 15:1, ensuring personalized attention in your classes. Most of our classes have fewer than 30 students, with upper-division courses often having 15-20 students.",
+            "keywords": [
+                "ratio",
+                "class size",
+                "faculty",
+                "professor",
+                "teacher",
+                "small classes"
+            ]
+        },
+        {
+            "question": "Do you have on-campus housing?",
+            "answer": "Yes, we have 10 residence halls on campus with various room configurations. Freshmen are guaranteed housing, and upper-classmen can apply for apartment-style living. Housing applications open in February.",
+            "keywords": [
+                "housing",
+                "dorm",
+                "residence",
+                "live",
+                "room",
+                "apartment"
+            ]
+        },
+        {
+            "question": "What sports do you offer?",
+            "answer": "We compete in NCAA Division I and offer football, basketball, baseball, soccer, swimming, tennis, track & field, volleyball, and more. We also have numerous intramural and club sports.",
+            "keywords": [
+                "sport",
+                "athletic",
+                "team",
+                "game",
+                "play",
+                "compete",
+                "intramural"
+            ]
+        },
+        {
+            "question": "How do I schedule a campus tour?",
+            "answer": "You can schedule a campus tour online through our admissions website or by calling the admissions office at (555) 123-4567. Tours are offered Monday through Friday at 10am and 2pm, and Saturdays at 11am.",
+            "keywords": [
+                "tour",
+                "visit",
+                "see",
+                "campus",
+                "schedule",
+                "appointment"
+            ]
+        },
+        {
+            "question": "Who is Mangale Lopchan?",
+            "answer": "Yes i do know about Mangale Lopchan, He is Infrastructure Engineer.",
+            "keywords": [
+                "Mangale",
+                "lopchan",
+                "infrastructure"
+            ]
+        }
+    ]
+}
