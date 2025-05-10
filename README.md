@@ -1,4 +1,4 @@
-# College Smart Chatbot
+# Smart Chatbot
 
 A simple, rule-based chatbot for answering college-related questions. This project demonstrates how to build a basic chatbot without using complex AI models or libraries.
 
@@ -15,7 +15,7 @@ A simple, rule-based chatbot for answering college-related questions. This proje
 - **Frontend**: HTML, CSS, JavaScript
 - **Algorithm**: Pattern Matching, Dictionary Lookup
 - **Storage**: JSON
-- **Version Control**: Git + GitHub
+- **Version Control**: Git
 
 ## Project Structure
 
@@ -46,27 +46,27 @@ ai-bot/
 
 1. Clone the repository:
    \`\`\`
-   git clone https://github.com/yourusername/college-smart-chatbot.git
-   cd college-smart-chatbot
+   git clone https://github.com/LinuxNerdBTW/ai-bot.git
+   cd ai-bot
    \`\`\`
 
-2. Create a virtual environment:
+3. Create a virtual environment:
    \`\`\`
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    \`\`\`
 
-3. Install dependencies:
+4. Install dependencies:
    \`\`\`
    pip install -r requirements.txt
    \`\`\`
 
-4. Run the application:
+5. Run the application:
    \`\`\`
    python run.py
    \`\`\`
 
-5. Open your browser and navigate to:
+6. Open your browser and navigate to:
    \`\`\`
    http://127.0.0.1:5000/
    \`\`\`
