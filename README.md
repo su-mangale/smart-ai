@@ -45,31 +45,31 @@ ai-bot/
 ## Setup Instructions
 
 1. Clone the repository:
-   \`\`\`
+   ```
    git clone https://github.com/LinuxNerdBTW/ai-bot.git
    cd ai-bot
-   \`\`\`
+   ```
 
 3. Create a virtual environment:
-   \`\`\`
+   ```
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
-   \`\`\`
+   ```
 
 4. Install dependencies:
-   \`\`\`
+   ```
    pip install -r requirements.txt
-   \`\`\`
+   ```
 
 5. Run the application:
-   \`\`\`
+   ```
    python run.py
-   \`\`\`
+   ```
 
 6. Open your browser and navigate to:
-   \`\`\`
+   ```
    http://127.0.0.1:5000/
-   \`\`\`
+   ```
 
 ## Customizing the Chatbot
 
@@ -82,13 +82,13 @@ To add new questions and answers, edit the `app/data/faqs.json` file. Each FAQ s
 - `keywords`: An array of keywords that trigger this response
 
 Example:
-\`\`\`json
+```json
 {
   "question": "What clubs are available?",
   "answer": "We have over 50 student clubs including debate, robotics, and photography.",
   "keywords": ["club", "organization", "activity", "extracurricular"]
 }
-\`\`\`
+```
 
 ### Modifying Chatbot Logic
 
