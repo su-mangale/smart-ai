@@ -9,28 +9,29 @@
 </head>
 
 <body>
-    <div class="container">
-        <div class="chat-container">
-            <div class="chat-header">
-                <h1>Smart Assistant</h1>
-                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">
-                    ☀️
-                </button>
+    <div class="chat-wrapper">
+        <div class="chat-header">
+            <h1>Smart Assistant</h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">☀️</button>
+        </div>
+
+        <div class="chat-messages" id="chat-messages">
+            <div class="message bot-message">
+                Hello! I'm your Smart Assistant. How can I help you today?
             </div>
-            <div class="chat-messages" id="chat-messages">
-                <div class="message bot-message">
-                    Hello! I'm your Smart Assistant. How can I help you today?
-                </div>
-            </div>
-            <div class="typing-indicator" id="typing-indicator">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-            <div class="chat-input">
-                <input type="text" id="user-input" placeholder="Type your question here..." autocomplete="off">
-                <button id="send-button">Send</button>
-            </div>
+        </div>
+
+        <div class="typing-indicator" id="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+        <div class="chat-input-area">
+            <input type="text" id="user-input" placeholder="Send a message..." autocomplete="off">
+            <button id="mic-button" title="Start voice input">🎤</button>
+            <button id="send-button">➤</button>
+
         </div>
     </div>
 
@@ -141,6 +142,41 @@
             userInput.focus();
         });
     </script>
+    <script>
+        const micButton = document.getElementById('mic-button');
+        const userInput = document.getElementById('user-input');
+
+        // Check browser support
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                micButton.classList.add('active');
+            };
+
+            recognition.onend = () => {
+                micButton.classList.remove('active');
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                userInput.value = transcript;
+                userInput.focus();
+            };
+
+            micButton.addEventListener('click', () => {
+                recognition.start();
+            });
+        } else {
+            micButton.disabled = true;
+            micButton.title = "Voice input not supported in this browser.";
+        }
+    </script>
+
 </body>
 
 </html>
