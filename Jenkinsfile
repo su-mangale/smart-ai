@@ -2,7 +2,7 @@ pipeline {
   agent { label 'jenkinsnode' }
   environment {
     IMAGE_NAME = "2058615mangal/ai-bot"
-    IMAGE_TAG = "${BUILD_NUMBER}"
+    IMAGE_TAG = "${BUILD_ID}"
   }
   stages {
     stage('Build') {
