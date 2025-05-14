@@ -3,7 +3,7 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-       sh 'docker build -t 2058615mangal/ai-bot:latest .'
+       sh 'sudo docker build -t 2058615mangal/ai-bot:latest .'
       }
     }
     stage('Test') {
