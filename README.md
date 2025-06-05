@@ -84,7 +84,7 @@ To add new questions and answers, edit the `app/data/faqs.json` file. Each FAQ s
 Example:
 ```json
 {
-  "question": "What clubs are available?",
+  "question": "What clubs are available??",
   "answer": "We have over 50 student clubs including debate, robotics, and photography.",
   "keywords": ["club", "organization", "activity", "extracurricular"]
 }
