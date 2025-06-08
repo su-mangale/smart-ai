@@ -1,14 +1,13 @@
 pipeline {
     agent {
         kubernetes {
-            yamlFile 'clusters/prod/apps/chatbot/docker-agent.yaml'
+            yamlFile './docker-agent.yaml'
             defaultContainer 'docker'
         }
     }
 
     environment {
-        REPO_URL = 'https://github.com/su-mangale/fluxcd.git'
-        SPARSE_PATH = 'clusters/prod/apps/chatbot'
+        REPO_URL = 'https://github.com/su-mangale/samart-ai.git'
         IMAGE_TAG = "2.4.${BUILD_ID}"
         DOCKER_REGISTRY = 'docker.io'
         DOCKER_IMAGE = 'mangale/smart-ai'
@@ -16,43 +15,21 @@ pipeline {
     }
 
     stages {
-        stage('Prepare Workspace') {
-            steps {
-                container('jnlp') {
-                    sh '''
-                        mkdir -p /home/jenkins/agent/workspace
-                        chmod -R 777 /home/jenkins/agent/workspace
-                    '''
-                }
-            }
-        }
-
-        stage('Sparse Checkout') {
+        stage('Clone Repository') {
             steps {
                 container('docker') {
-                    sh '''
-                        git init
-                        git config --global --add safe.directory `pwd`
-                        git remote remove origin || true
-                        git remote add origin ${REPO_URL}
-                        git sparse-checkout init --cone
-                        git sparse-checkout set ${SPARSE_PATH}
-                        git pull origin main
-                    '''
+                    git url: "${REPO_URL}", branch: 'main'
                 }
             }
         }
-
 
         stage('Build Docker Image') {
             steps {
                 container('docker') {
-                    dir("${env.SPARSE_PATH}") {
-                        sh '''
-                            echo "Building image: ${DOCKER_IMAGE_FULL}"
-                            docker build -t ${DOCKER_IMAGE_FULL} .
-                        '''
-                    }
+                    sh '''
+                        echo "Building image: ${DOCKER_IMAGE_FULL}"
+                        docker build -t ${DOCKER_IMAGE_FULL} .
+                    '''
                 }
             }
         }
