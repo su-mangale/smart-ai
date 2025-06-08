@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        REPO_URL = 'https://github.com/su-mangale/samart-ai.git'
+        REPO_URL = 'https://github.com/su-mangale/smart-ai.git'
         IMAGE_TAG = "2.4.${BUILD_ID}"
         DOCKER_REGISTRY = 'docker.io'
         DOCKER_IMAGE = 'mangale/smart-ai'
