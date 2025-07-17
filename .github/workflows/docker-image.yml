@@ -59,6 +59,7 @@ jobs:
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body-file: trivy-report.md
+        
   manual-approval:
     name: Await Manual Approval
     needs: secure-build
