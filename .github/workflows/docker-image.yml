@@ -1,23 +1,23 @@
-name: Build and Scan Docker Image
+name: Build, Scan & Secure Docker Image for Production
 
 on:
   push:
-    branches:
-      - main
-
-env:
-  IMAGE_NAME: mangale/smart-ai
+    branches: [main]
 
 jobs:
-  build-and-scan:
+  secure-build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - name: Checkout source code
+      uses: actions/checkout@v3
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
+
+    - name: Get short commit SHA
+      id: vars
+      run: echo "SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v3
@@ -25,59 +25,41 @@ jobs:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
 
-    - name: Extract Git commit short SHA
-      id: vars
-      run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
-
     - name: Build Docker image with SBOM
       run: |
-        docker buildx build \
-          --sbom \
-          --push \
-          --tag $IMAGE_NAME:$SHORT_SHA \
-          .
+        docker buildx build --push --sbom=true --tag mangale/smart-ai:${{ env.SHORT_SHA }} .
 
     - name: Install Trivy
-      uses: aquasecurity/trivy-action@master
-      with:
-        version: latest
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget
+        wget https://github.com/aquasecurity/trivy/releases/download/v0.64.1/trivy_0.64.1_Linux-64bit.deb
+        sudo dpkg -i trivy_0.64.1_Linux-64bit.deb
 
-    - name: Scan Docker image with Trivy (do not fail on vulnerabilities)
+    - name: Scan Docker image with Trivy (fail on CRITICAL)
       run: |
         trivy image \
-          --format table \
-          --output trivy-report.txt \
-          --ignore-unfixed \
           --severity CRITICAL,HIGH,MEDIUM \
-          $IMAGE_NAME:$SHORT_SHA
-
-    - name: Upload Trivy report artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: trivy-report
-        path: trivy-report.txt
-
-    - name: Push Docker image
-      run: docker push $IMAGE_NAME:$SHORT_SHA
+          --format table \
+          --ignore-unfixed \
+          --output trivy-report.txt \
+          mangale/smart-ai:${{ env.SHORT_SHA }}
 
     - name: Send Trivy Report via Email
+      if: always()
       uses: dawidd6/action-send-mail@v3
       with:
         server_address: smtp.gmail.com
         server_port: 587
         username: ${{ secrets.EMAIL_USERNAME }}
         password: ${{ secrets.EMAIL_PASSWORD }}
-        subject: "🛡️ Trivy Vulnerability Report - $IMAGE_NAME:$SHORT_SHA"
+        subject: "🚨 Trivy Vulnerability Report - smart-ai:${{ env.SHORT_SHA }}"
         to: lopchanmangal5@gmail.com
-        from: "GitHub CI <${{ secrets.EMAIL_USERNAME }}>"
+        from: "GitHub Actions <${{ secrets.EMAIL_USERNAME }}>"
         body: |
           Hello,
 
-          Please find attached the Trivy scan report for image:
-          $IMAGE_NAME:$SHORT_SHA
+          Attached is the Trivy vulnerability report for mangale/smart-ai:${{ env.SHORT_SHA }}.
 
-          This scan did not block deployment but contains useful information for review.
-
-          Regards,
-          GitHub Actions
+          - GitHub Actions (Production Grade)
         attachments: trivy-report.txt
