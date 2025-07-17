@@ -1,25 +1,30 @@
-name: Build, Scan & Secure Docker Image for Production
+name: Build, Scan & Secure Docker Image with PR Comment and Manual Approval
 
 on:
-  push:
+  pull_request:
     branches: [main]
+
 env:
   IMAGE_NAME: mangale/smart-ai
 
 jobs:
   secure-build:
     runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.vars.outputs.image_tag }}
 
     steps:
     - name: Checkout source code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
     - name: Get short commit SHA
       id: vars
-      run: echo "SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
+      run: |
+        echo "SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
+        echo "::set-output name=image_tag::$(echo $GITHUB_SHA | cut -c1-7)"
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v3
@@ -27,14 +32,16 @@ jobs:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
 
-    - name: Build Docker image with SBOM
-      run: |
-        docker buildx build --push --sbom=true --tag ${{ env.IMAGE_NAME }}:${{ env.SHORT_SHA }} .
+    - name: Build Docker Image (No Push Yet)
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        load: true
+        tags: ${{ env.IMAGE_NAME }}:${{ env.SHORT_SHA }}
 
     - name: Install Trivy
       run: |
-        sudo apt-get update
-        sudo apt-get install -y wget
         wget https://github.com/aquasecurity/trivy/releases/download/v0.64.1/trivy_0.64.1_Linux-64bit.deb
         sudo dpkg -i trivy_0.64.1_Linux-64bit.deb
 
@@ -42,26 +49,43 @@ jobs:
       run: |
         trivy image \
           --severity CRITICAL,HIGH,MEDIUM \
-          --format table \
           --ignore-unfixed \
-          --output trivy-report.txt \
-          $IMAGE_NAME:${{ env.SHORT_SHA }}
+          --format markdown \
+          --output trivy-report.md \
+          ${{ env.IMAGE_NAME }}:${{ env.SHORT_SHA }}
 
-    - name: Send Trivy Report via Email
-      if: always()
-      uses: dawidd6/action-send-mail@v3
+    - name: Comment Trivy Report on PR
+      uses: peter-evans/create-or-update-comment@v4
       with:
-        server_address: smtp.gmail.com
-        server_port: 587
-        username: ${{ secrets.EMAIL_USERNAME }}
-        password: ${{ secrets.EMAIL_PASSWORD }}
-        subject: "🚨 Trivy Vulnerability Report - ${{ env.IMAGE_NAME }}:${{ env.SHORT_SHA }}"
-        to: lopchanmangal5@gmail.com
-        from: "GitHub Actions <${{ secrets.EMAIL_USERNAME }}>"
-        body: |
-          Hello,
+        issue-number: ${{ github.event.pull_request.number }}
+        body-file: trivy-report.md
+  manual-approval:
+    name: Await Manual Approval
+    needs: secure-build
+    runs-on: ubuntu-latest
+    environment:
+      name: production-approval  # Setup in repo settings
+    steps:
+      - run: echo "Awaiting manual approval before pushing image..."
 
-          Attached is the Trivy vulnerability report for ${{ env.IMAGE_NAME }}:${{ env.SHORT_SHA }}.
+  push-image:
+    name: Push Docker Image to Registry
+    needs: manual-approval
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
 
-          - GitHub Actions (Production Grade)
-        attachments: trivy-report.txt
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+
+    - name: Build and Push Image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: ${{ env.IMAGE_NAME }}:${{ needs.secure-build.outputs.image_tag }}
