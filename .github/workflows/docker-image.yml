@@ -1,0 +1,83 @@
+name: Build and Scan Docker Image
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  IMAGE_NAME: mangale/smart-ai
+
+jobs:
+  build-and-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+
+    - name: Extract Git commit short SHA
+      id: vars
+      run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+
+    - name: Build Docker image with SBOM
+      run: |
+        docker buildx build \
+          --sbom \
+          --load \
+          --tag $IMAGE_NAME:$SHORT_SHA \
+          .
+
+    - name: Install Trivy
+      uses: aquasecurity/trivy-action@master
+      with:
+        version: latest
+
+    - name: Scan Docker image with Trivy (do not fail on vulnerabilities)
+      run: |
+        trivy image \
+          --format table \
+          --output trivy-report.txt \
+          --ignore-unfixed \
+          --severity CRITICAL,HIGH,MEDIUM \
+          $IMAGE_NAME:$SHORT_SHA
+
+    - name: Upload Trivy report artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: trivy-report
+        path: trivy-report.txt
+
+    - name: Push Docker image
+      run: docker push $IMAGE_NAME:$SHORT_SHA
+
+    - name: Send Trivy Report via Email
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "🛡️ Trivy Vulnerability Report - $IMAGE_NAME:$SHORT_SHA"
+        to: lopchanmangal5@gmail.com
+        from: "GitHub CI <${{ secrets.EMAIL_USERNAME }}>"
+        body: |
+          Hello,
+
+          Please find attached the Trivy scan report for image:
+          $IMAGE_NAME:$SHORT_SHA
+
+          This scan did not block deployment but contains useful information for review.
+
+          Regards,
+          GitHub Actions
+        attachments: trivy-report.txt
