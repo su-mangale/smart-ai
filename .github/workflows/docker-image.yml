@@ -33,7 +33,7 @@ jobs:
       run: |
         docker buildx build \
           --sbom \
-          --load \
+          --push \
           --tag $IMAGE_NAME:$SHORT_SHA \
           .
 
