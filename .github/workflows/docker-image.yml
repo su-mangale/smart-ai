@@ -3,6 +3,8 @@ name: Build, Scan & Secure Docker Image for Production
 on:
   push:
     branches: [main]
+env:
+  IMAGE_NAME: mangale/smart-ai
 
 jobs:
   secure-build:
@@ -27,7 +29,7 @@ jobs:
 
     - name: Build Docker image with SBOM
       run: |
-        docker buildx build --push --sbom=true --tag mangale/smart-ai:${{ env.SHORT_SHA }} .
+        docker buildx build --push --sbom=true --tag $IMAGE_NAME:${{ env.SHORT_SHA }} .
 
     - name: Install Trivy
       run: |
@@ -43,7 +45,7 @@ jobs:
           --format table \
           --ignore-unfixed \
           --output trivy-report.txt \
-          mangale/smart-ai:${{ env.SHORT_SHA }}
+          $IMAGE_NAME:${{ env.SHORT_SHA }}
 
     - name: Send Trivy Report via Email
       if: always()
@@ -53,13 +55,13 @@ jobs:
         server_port: 587
         username: ${{ secrets.EMAIL_USERNAME }}
         password: ${{ secrets.EMAIL_PASSWORD }}
-        subject: "🚨 Trivy Vulnerability Report - smart-ai:${{ env.SHORT_SHA }}"
+        subject: "🚨 Trivy Vulnerability Report - $IMAGE_NAME:${{ env.SHORT_SHA }}"
         to: lopchanmangal5@gmail.com
         from: "GitHub Actions <${{ secrets.EMAIL_USERNAME }}>"
         body: |
           Hello,
 
-          Attached is the Trivy vulnerability report for mangale/smart-ai:${{ env.SHORT_SHA }}.
+          Attached is the Trivy vulnerability report for $IMAGE_NAME:${{ env.SHORT_SHA }}.
 
           - GitHub Actions (Production Grade)
         attachments: trivy-report.txt
