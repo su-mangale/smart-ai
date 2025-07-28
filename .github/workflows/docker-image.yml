@@ -78,30 +78,34 @@ jobs:
           ---
           **Next Steps:** Please review the scan results above. If the image is safe to deploy, approve the workflow in the [Actions tab](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) to push the image to the registry.
 
-    - name: Create Issue for Push Events
+    - name: Upload Trivy Report as Artifact (for push events)
       if: github.event_name == 'push'
-      uses: dacbd/create-issue-action@main
+      uses: actions/upload-artifact@v4
       with:
-        token: ${{ github.token }}
-        title: "🔒 Security Scan Report - ${{ env.IMAGE_NAME }}:${{ env.SHORT_SHA }}"
-        body: |
-          ## 🔒 Docker Image Security Scan Report
-          
-          **Repository:** ${{ github.repository }}  
-          **Branch:** ${{ github.ref_name }}  
-          **Commit:** ${{ github.sha }}  
-          **Image:** ${{ env.IMAGE_NAME }}:${{ env.SHORT_SHA }}  
-          **Pushed by:** ${{ github.actor }}  
-          
-          ### 📊 Trivy Security Scan Results:
-          ```
-          $(cat trivy-report.txt)
-          ```
-          
-          ---
-          **Next Steps:** Please review the scan results above and approve the workflow in the [Actions tab](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) to push the image to the registry.
-          
-          > **Note:** This issue was automatically created for a direct push to the repository.
+        name: trivy-security-report-${{ env.SHORT_SHA }}
+        path: trivy-report.txt
+        retention-days: 30
+
+    - name: Add Job Summary (for push events)
+      if: github.event_name == 'push'
+      run: |
+        echo "## 🔒 Docker Image Security Scan Report" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Repository:** ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Image:** ${{ env.IMAGE_NAME }}:${{ env.SHORT_SHA }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Pushed by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📊 Trivy Security Scan Results:" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        cat trivy-report.txt >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "---" >> $GITHUB_STEP_SUMMARY
+        echo "**Next Steps:** Please review the scan results above and approve the workflow to push the image to the registry." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "📎 **Artifact:** The full security report is available as an artifact: \`trivy-security-report-${{ env.SHORT_SHA }}\`" >> $GITHUB_STEP_SUMMARY
         
   manual-approval:
     name: Await Manual Approval
