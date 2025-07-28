@@ -1,4 +1,4 @@
-name: Build, Scan & Secure Docker Image with PR Comment and Manual Approval
+name: DevSecOps workflow
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ env:
   IMAGE_NAME: mangale/smart-ai
 
 jobs:
-  secure-build:
+  S3cure-build:
     runs-on: ubuntu-latest
     outputs:
       image_tag: ${{ steps.vars.outputs.image_tag }}
@@ -107,7 +107,7 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "📎 **Artifact:** The full security report is available as an artifact: \`trivy-security-report-${{ env.SHORT_SHA }}\`" >> $GITHUB_STEP_SUMMARY
         
-  manual-approval:
+  waiting-for-approval:
     name: Await Manual Approval
     needs: secure-build
     runs-on: ubuntu-latest
