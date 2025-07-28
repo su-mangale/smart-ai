@@ -109,7 +109,7 @@ jobs:
         
   waiting-for-approval:
     name: Await Manual Approval
-    needs: secure-build
+    needs: S3cure-build
     runs-on: ubuntu-latest
     environment:
       name: production-approval  # Setup in repo settings
@@ -118,7 +118,7 @@ jobs:
 
   push-image:
     name: Push Docker Image to Registry
-    needs: [manual-approval, secure-build]
+    needs: [waiting-for-approval, S3cure-build]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout source code
