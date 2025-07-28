@@ -65,7 +65,7 @@ jobs:
     needs: secure-build
     runs-on: ubuntu-latest
     environment:
-      name: production-approval  # Setup in repo settings
+      name: production-approval  # Setuped in repo settings
     steps:
       - run: echo "Awaiting manual approval before pushing image..."
 
