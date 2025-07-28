@@ -1,8 +1,8 @@
-name: Build, Scan & Secure Docker Image with PR Comment and Manual Approval
+name: Build, Scan & Secure Docker Image with Email Notification and Manual Approval
 
 on:
-  pull_request:
-    branches: [main]
+  push:
+    branches: [ main, develop ]  # Triggers on push to main or develop branches
 
 env:
   IMAGE_NAME: mangale/smart-ai
@@ -24,7 +24,7 @@ jobs:
       id: vars
       run: |
         echo "SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
-        echo "::set-output name=image_tag::$(echo $GITHUB_SHA | cut -c1-7)"
+        echo "image_tag=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_OUTPUT
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v3
@@ -54,11 +54,32 @@ jobs:
           --output trivy-report.md \
           ${{ env.IMAGE_NAME }}:${{ env.SHORT_SHA }}
 
-    - name: Comment Trivy Report on PR
-      uses: peter-evans/create-or-update-comment@v4
+    - name: Send Trivy Report via Email
+      uses: dawidd6/action-send-mail@v3
       with:
-        issue-number: ${{ github.event.pull_request.number }}
-        body-file: trivy-report.md
+        server_address: smtp.gmail.com
+        server_port: 465
+        username: ${{ secrets.GMAIL_USERNAME }}
+        password: ${{ secrets.GMAIL_PASSWORD }}
+        subject: 🔒 Security Scan Report for ${{ env.IMAGE_NAME }}:${{ env.SHORT_SHA }}
+        to: ${{ secrets.APPROVER_EMAIL }}
+        from: ${{ secrets.GMAIL_USERNAME }}
+        html_body: |
+          <h2>Docker Image Security Scan Report</h2>
+          <p><strong>Repository:</strong> ${{ github.repository }}</p>
+          <p><strong>Branch:</strong> ${{ github.ref_name }}</p>
+          <p><strong>Commit:</strong> ${{ github.sha }}</p>
+          <p><strong>Image:</strong> ${{ env.IMAGE_NAME }}:${{ env.SHORT_SHA }}</p>
+          <p><strong>Pushed by:</strong> ${{ github.actor }}</p>
+          
+          <h3>Trivy Security Scan Results:</h3>
+          <pre style="background-color: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto;">
+          $(cat trivy-report.md)
+          </pre>
+          
+          <p>Please review the scan results and approve the deployment in GitHub Actions if the image is safe to push to registry.</p>
+          <p><a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Workflow Run</a></p>
+        attachments: trivy-report.md
         
   manual-approval:
     name: Await Manual Approval
@@ -71,9 +92,12 @@ jobs:
 
   push-image:
     name: Push Docker Image to Registry
-    needs: manual-approval
+    needs: [manual-approval, secure-build]
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout source code
+      uses: actions/checkout@v4
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
