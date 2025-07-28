@@ -50,8 +50,8 @@ jobs:
         trivy image \
           --severity CRITICAL,HIGH,MEDIUM \
           --ignore-unfixed \
-          --format markdown \
-          --output trivy-report.md \
+          --format table \
+          --output trivy-report.txt \
           ${{ env.IMAGE_NAME }}:${{ env.SHORT_SHA }}
 
     - name: Send Trivy Report via Email
@@ -74,12 +74,12 @@ jobs:
           
           <h3>Trivy Security Scan Results:</h3>
           <pre style="background-color: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto;">
-          $(cat trivy-report.md)
+          $(cat trivy-report.txt)
           </pre>
           
           <p>Please review the scan results and approve the deployment in GitHub Actions if the image is safe to push to registry.</p>
           <p><a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Workflow Run</a></p>
-        attachments: trivy-report.md
+        attachments: trivy-report.txt
         
   manual-approval:
     name: Await Manual Approval
