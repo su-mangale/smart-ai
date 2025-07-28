@@ -11,6 +11,7 @@ env:
 
 jobs:
   S3cure-build:
+    name: Build Code
     runs-on: ubuntu-latest
     outputs:
       image_tag: ${{ steps.vars.outputs.image_tag }}
