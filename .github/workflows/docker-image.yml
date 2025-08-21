@@ -91,7 +91,7 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**Repository:** ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
         echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-  echo "**Image:** ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Image:** ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
         echo "**Pushed by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### 📊 Trivy Security Scan Results:" >> $GITHUB_STEP_SUMMARY
@@ -102,7 +102,7 @@ jobs:
         echo "---" >> $GITHUB_STEP_SUMMARY
         echo "**Next Steps:** Please review the scan results above and approve the workflow to push the image to the registry." >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-  echo "📎 **Artifact:** The full security report is available as an artifact: \`trivy-security-report-${{ env.IMAGE_TAG }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "📎 **Artifact:** The full security report is available as an artifact: \`trivy-security-report-${{ env.IMAGE_TAG }}\`" >> $GITHUB_STEP_SUMMARY
         
   waiting-for-approval:
     name: Await Manual Approval
