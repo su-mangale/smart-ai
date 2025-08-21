@@ -91,7 +91,6 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**Repository:** ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
         echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-        echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
   echo "**Image:** ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
         echo "**Pushed by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
