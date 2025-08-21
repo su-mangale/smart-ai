@@ -80,7 +80,7 @@ jobs:
       if: github.event_name == 'push'
       uses: actions/upload-artifact@v4
       with:
-  name: trivy-security-report-${{ env.IMAGE_TAG }}
+        name: trivy-security-report-${{ env.IMAGE_TAG }}
         path: trivy-report.txt
         retention-days: 30
 
