@@ -1,59 +1,37 @@
-# Build stage - Install dependencies and compile
-FROM python:3.11-slim AS builder
+# Use the official Python Alpine image as base
+FROM python:3.11-alpine
 
 # Set working directory
 WORKDIR /app
 
-# Set environment variables for build stage
+# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
-# Install system dependencies for building
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    libc6-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Create a non-root user for security
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-# Install pip-tools for dependency resolution
-RUN pip install pip-tools
-
-# Copy requirements files
-COPY requirements.in .
+# Install dependencies
 COPY requirements.txt .
-
-# Generate pinned requirements if not exists, or use existing
-RUN if [ ! -f requirements.txt ] || [ requirements.in -nt requirements.txt ]; then \
-        pip-compile requirements.in; \
-    fi
-
-# Install dependencies in user directory
-RUN pip install --user --no-cache-dir -r requirements.txt
-
-# Production Stage - Distroless for minimal attack surface
-FROM gcr.io/distroless/python3-debian11 AS production
-
-# Set working directory
-WORKDIR /app
-
-# Set environment variables for production
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    FLASK_ENV=production \
-    FLASK_APP=run.py \
-    PYTHONPATH=/app
-
-# Copy Python packages from builder stage
-COPY --from=builder /root/.local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY --from=builder /root/.local/bin /usr/local/bin
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY . .
 
+# Change ownership to non-root user
+RUN chown -R appuser:appgroup /app
+
+# Switch to non-root user
+USER appuser
+
 # Expose port
 EXPOSE 5000
 
-# Run the application directly with Python
-# Note: Distroless doesn't have shell, so we use exec form
-CMD ["python", "-m", "flask", "run", "--host=0.0.0.0"]
+# Set Flask environment to production
+ENV FLASK_ENV=production \
+    FLASK_APP=run.py
+
+# Run the application
+CMD ["flask", "run", "--host=0.0.0.0"]
