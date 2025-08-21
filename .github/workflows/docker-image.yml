@@ -8,13 +8,14 @@ on:
 
 env:
   IMAGE_NAME: mangale/smart-ai
+  IMAGE_TAG: ${{ github.run_number }}
 
 jobs:
   S3cure-build:
     name: Build Code
     runs-on: ubuntu-latest
     outputs:
-      image_tag: ${{ steps.vars.outputs.image_tag }}
+      image_tag: ${{ env.IMAGE_TAG }}
 
     steps:
     - name: Checkout source code
@@ -23,11 +24,7 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Get short commit SHA
-      id: vars
-      run: |
-        echo "SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
-        echo "image_tag=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_OUTPUT
+  # No need to generate short SHA, using github.run_number for image tag
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v3
@@ -41,7 +38,7 @@ jobs:
         context: .
         file: ./Dockerfile
         load: true
-        tags: ${{ env.IMAGE_NAME }}:${{ env.SHORT_SHA }}
+        tags: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
     - name: Install Trivy
       run: |
@@ -55,7 +52,7 @@ jobs:
           --ignore-unfixed \
           --format table \
           --output trivy-report.txt \
-          ${{ env.IMAGE_NAME }}:${{ env.SHORT_SHA }}
+          ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
     - name: Comment Trivy Report on PR
       if: github.event_name == 'pull_request'
@@ -68,7 +65,7 @@ jobs:
           **Repository:** ${{ github.repository }}  
           **Branch:** ${{ github.ref_name }}  
           **Commit:** ${{ github.sha }}  
-          **Image:** ${{ env.IMAGE_NAME }}:${{ env.SHORT_SHA }}  
+          **Image:** ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}  
           **Triggered by:** ${{ github.actor }}  
           
           ### 📊 Trivy Security Scan Results:
@@ -83,7 +80,7 @@ jobs:
       if: github.event_name == 'push'
       uses: actions/upload-artifact@v4
       with:
-        name: trivy-security-report-${{ env.SHORT_SHA }}
+  name: trivy-security-report-${{ env.IMAGE_TAG }}
         path: trivy-report.txt
         retention-days: 30
 
@@ -95,7 +92,7 @@ jobs:
         echo "**Repository:** ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
         echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
         echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-        echo "**Image:** ${{ env.IMAGE_NAME }}:${{ env.SHORT_SHA }}" >> $GITHUB_STEP_SUMMARY
+  echo "**Image:** ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
         echo "**Pushed by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### 📊 Trivy Security Scan Results:" >> $GITHUB_STEP_SUMMARY
@@ -106,7 +103,7 @@ jobs:
         echo "---" >> $GITHUB_STEP_SUMMARY
         echo "**Next Steps:** Please review the scan results above and approve the workflow to push the image to the registry." >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "📎 **Artifact:** The full security report is available as an artifact: \`trivy-security-report-${{ env.SHORT_SHA }}\`" >> $GITHUB_STEP_SUMMARY
+  echo "📎 **Artifact:** The full security report is available as an artifact: \`trivy-security-report-${{ env.IMAGE_TAG }}\`" >> $GITHUB_STEP_SUMMARY
         
   waiting-for-approval:
     name: Await Manual Approval
@@ -140,4 +137,4 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: ${{ env.IMAGE_NAME }}:${{ needs.secure-build.outputs.image_tag }}
+  tags: ${{ env.IMAGE_NAME }}:${{ needs.S3cure-build.outputs.image_tag }}
