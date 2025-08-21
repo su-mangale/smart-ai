@@ -13,7 +13,7 @@ A simple, rule-based chatbot for answering college-related questions. This proje
 
 - **Backend**: Python + Flask
 - **Frontend**: HTML, CSS, JavaScript
-- **Algorithm**: Pattern Matching, Dictionary 
+- **Algorithm**: Pattern Matching, Dictionary Lookup
 - **Storage**: JSON
 - **Version Control**: Git
 
